@@ -32,6 +32,7 @@ class _ConfirmationState extends State<Confirmation> {
   void initState() {
     super.initState();
     SchedulerBinding.instance.addPostFrameCallback((data) async {
+      saveImageGallery();
       // ignore: unnecessary_null_comparison
       if (Env.REPORT_RESPONSE_MSG! == "" || Env.REPORT_RESPONSE_MSG! == null) {
         alertDialogByGetxonebutton("신고알림", Env.MSG_REPORT_NOT_RESPONSE);
@@ -40,7 +41,6 @@ class _ConfirmationState extends State<Confirmation> {
       }
       testcount++;
       Log.debug("state {$testcount}");
-      // saveImageGallery();
       controller.initialize();
     });
   }

@@ -52,29 +52,7 @@ class _NumbercameraState extends State<Numbercamera> {
                     color: AppColors.white,
                   ),
                 ],
-              )
-              // child: Padding(
-              //     padding: const EdgeInsets.symmetric(vertical: 20),
-
-              //     child: Row(
-              //       mainAxisSize: MainAxisSize.min,
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       children: const [
-              //         CircularProgressIndicator(
-              //           color: AppColors.black,
-              //         ),
-              //         SizedBox(width: 15),
-              //         CustomText(
-              //           weight: AppFontWeight.bold,
-              //           text: "로딩중",
-              //           color: Colors.black,
-              //           size: 20,
-              //         ),
-              //         // SizedBox(width: 50, height: 100, child: Lottie.asset('assets/loading_black.json', fit: BoxFit.fill)),
-              //       ],
-              //     ),
-              //     ),
-              );
+              ));
         });
     await Future.delayed(const Duration(seconds: 1));
     Get.back();
@@ -83,8 +61,6 @@ class _NumbercameraState extends State<Numbercamera> {
   @override
   void dispose() {
     super.dispose();
-    // cameradispose();
-    // controller!.setFlashMode(FlashMode.off);
   }
 
   @override
