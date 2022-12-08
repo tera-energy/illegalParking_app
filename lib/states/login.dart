@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:illegalparking_app/config/style.dart';
 import 'package:illegalparking_app/config/env.dart';
 import 'package:illegalparking_app/controllers/login_controller.dart';
+import 'package:illegalparking_app/controllers/setting_controller.dart';
 import 'package:illegalparking_app/models/storage_model.dart';
 import 'package:illegalparking_app/services/server_service.dart';
+import 'package:illegalparking_app/services/setting_service.dart';
 import 'package:illegalparking_app/states/widgets/form.dart';
 import 'package:illegalparking_app/utils/alarm_util.dart';
 import 'package:illegalparking_app/utils/log_util.dart';
@@ -26,6 +29,7 @@ class _LoginState extends State<Login> {
   late TextEditingController _idController = TextEditingController();
   late TextEditingController _passController = TextEditingController();
   final loginController = Get.put(LoginController());
+  final settingController = Get.put(SettingController());
 
   @override
   void initState() {
@@ -51,6 +55,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    mediasizeSetting(context);
     if (Platform.isIOS) {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(statusBarBrightness: loginController.isGuestMode ? Brightness.light : Brightness.dark));
       // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarBrightness: Brightness.dark)); // IOS = Brightness.light의 경우 글자 검정, 배경 흰색
@@ -151,6 +156,7 @@ class _LoginState extends State<Login> {
                   children: [
                     Container(
                       child: createTextFormField(
+                        obscureText: false,
                         fillColor: AppColors.textField,
                         controller: _idController,
                         hintText: "아이디 또는 이메일을 입력해주세요.",
@@ -158,12 +164,18 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                     createTextFormField(
-                      obscureText: true,
-                      fillColor: AppColors.textField,
-                      controller: _passController,
-                      hintText: "비밀번호를 입력해주세요.",
-                      validation: passwordValidator,
-                    ),
+                        obscureText: settingController.hidepasswordLogin.value,
+                        fillColor: AppColors.textField,
+                        controller: _passController,
+                        hintText: "비밀번호를 입력해주세요.",
+                        validation: passwordValidator,
+                        passwordswich: true,
+                        function: () {
+                          settingController.hidepasswordLoginwrite(!settingController.hidepasswordLogin.value);
+                          setState(
+                            () {},
+                          );
+                        }),
                     Row(
                       children: [
                         // 자동 로그인
@@ -258,7 +270,7 @@ class _LoginState extends State<Login> {
                     text: "회원가입",
                     function: () {
                       controller.getAutoLogin(false);
-                      Navigator.pushNamed(context, "/sign_up");
+                      Navigator.pushNamed(context, "/sign_up_consent");
                     },
                   ),
                 ),

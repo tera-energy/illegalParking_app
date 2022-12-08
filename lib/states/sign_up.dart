@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:illegalparking_app/config/style.dart';
 import 'package:illegalparking_app/config/env.dart';
 import 'package:illegalparking_app/controllers/login_controller.dart';
+import 'package:illegalparking_app/controllers/setting_controller.dart';
 import 'package:illegalparking_app/models/storage_model.dart';
 import 'package:illegalparking_app/services/network_service.dart';
 import 'package:illegalparking_app/services/server_service.dart';
@@ -50,6 +51,7 @@ class _SignUpState extends State<SignUp> {
   bool duplicatedId = false;
   Timer? timer;
   int? authNum;
+  final settingController = Get.put(SettingController());
 
   List profileCharicterList = [
     {
@@ -186,6 +188,7 @@ class _SignUpState extends State<SignUp> {
                     text: "아이디(이메일)",
                   ),
                   createTextFormField(
+                    obscureText: false,
                     focusNode: _idfocusNode,
                     fillColor: AppColors.textField,
                     hintText: "아이디 또는 이메일을 입력해주세요.",
@@ -204,19 +207,31 @@ class _SignUpState extends State<SignUp> {
                     text: "비밀번호",
                   ),
                   createTextFormField(
-                    controller: passController,
-                    obscureText: true,
-                    fillColor: AppColors.textField,
-                    hintText: "비밀번호를 입력해주세요.",
-                    helperText: "보안에 안전한 암호 입니다.",
-                    validation: passwordValidator,
-                  ),
+                      controller: passController,
+                      obscureText: settingController.hidepasswordSign.value,
+                      fillColor: AppColors.textField,
+                      hintText: "비밀번호를 입력해주세요.",
+                      helperText: "보안에 안전한 암호 입니다.",
+                      validation: passwordValidator,
+                      passwordswich: true,
+                      function: () {
+                        settingController.hidepasswordSignwrite(!settingController.hidepasswordSign.value);
+                        setState(
+                          () {},
+                        );
+                      }),
                   createTextFormField(
-                    fillColor: AppColors.textField,
-                    obscureText: true,
-                    hintText: "비밀번호를 한번 더 입력해주세요.",
-                    validation: passwordConfirmValidator,
-                  ),
+                      fillColor: AppColors.textField,
+                      obscureText: settingController.hidepasswordSign2.value,
+                      hintText: "비밀번호를 한번 더 입력해주세요.",
+                      validation: passwordConfirmValidator,
+                      passwordswich: true,
+                      function: () {
+                        settingController.hidepasswordSign2write(!settingController.hidepasswordSign2.value);
+                        setState(
+                          () {},
+                        );
+                      }),
                   // 이름
                   createCustomText(
                     top: 0.0,
@@ -226,12 +241,12 @@ class _SignUpState extends State<SignUp> {
                     text: "이름",
                   ),
                   createTextFormField(
+                    obscureText: false,
                     fillColor: AppColors.textField,
                     controller: nameCotroller,
                     hintText: "이름을 입력해주세요.",
                     validation: nameValidator,
                   ),
-
                   //전화번호
                   createCustomText(
                     top: 0.0,
@@ -241,6 +256,7 @@ class _SignUpState extends State<SignUp> {
                     text: "전화번호",
                   ),
                   createTextFormField(
+                    obscureText: false,
                     fillColor: AppColors.textField,
                     hintText: "전화번호를 입력해주세요.",
                     // helperText: "'-' 없이 입력해주세요",
@@ -271,6 +287,7 @@ class _SignUpState extends State<SignUp> {
                               }),
                   if (sendAuthentication)
                     createTextFormField(
+                      obscureText: false,
                       fillColor: AppColors.textField,
                       controller: authKeyController,
                       hintText: "인증번호를 입력해주세요.",
@@ -313,63 +330,6 @@ class _SignUpState extends State<SignUp> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 약관
-                        SizedBox(
-                          height: 200,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Scrollbar(
-                              thumbVisibility: true,
-                              controller: _termsSummaryController,
-                              child: ListView.builder(
-                                itemCount: 1,
-                                controller: _termsSummaryController,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return const Text(Env.USER_TERMS);
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                        // 약관동의
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              Checkbox(
-                                fillColor: MaterialStateProperty.resolveWith((states) => AppColors.blue),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                                value: serviceTerms,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    serviceTerms = value!;
-                                    _formKey.currentState!.save();
-                                  });
-                                },
-                              ),
-                              createCustomText(
-                                padding: 0.0,
-                                text: "약관 동의",
-                              ),
-                              const Spacer(),
-                              TextButton(
-                                onPressed: () {
-                                  showServiceTermsDialog();
-                                },
-                                child: Row(children: [
-                                  createCustomText(
-                                    padding: 0.0,
-                                    text: "더보기",
-                                  ),
-                                  const Icon(
-                                    Icons.chevron_right,
-                                    color: Colors.black,
-                                  ),
-                                ]),
-                              ),
-                            ],
-                          ),
-                        ),
                         // 프로필 캐릭터 선택
                         createCustomText(
                           text: "프로필 캐릭터 선택",
@@ -389,21 +349,19 @@ class _SignUpState extends State<SignUp> {
                         createElevatedButton(
                           color: Colors.black,
                           text: "회원생성",
-                          function: serviceTerms
-                              ? () {
-                                  if (_formKey.currentState!.validate()) {
-                                    register(idController.text, passController.text, nameCotroller.text, phoneNumController.text, photoName).then((registerInfo) {
-                                      if (registerInfo.success) {
-                                        showSignUpSuccessDialog();
-                                      } else {
-                                        showErrorSnackBar(context, registerInfo.message!);
-                                      }
-                                    });
-                                  } else {
-                                    showErrorToast(text: "입력 사항을 확인해주세요");
-                                  }
+                          function: () {
+                            if (_formKey.currentState!.validate()) {
+                              register(idController.text, passController.text, nameCotroller.text, phoneNumController.text, photoName).then((registerInfo) {
+                                if (registerInfo.success) {
+                                  showSignUpSuccessDialog();
+                                } else {
+                                  showErrorSnackBar(context, registerInfo.message!);
                                 }
-                              : null,
+                              });
+                            } else {
+                              showErrorToast(text: "입력 사항을 확인해주세요");
+                            }
+                          },
                         ),
                       ],
                     ),
