@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:illegalparking_app/config/env.dart';
 import 'package:illegalparking_app/services/save_image_service.dart';
+import 'package:illegalparking_app/services/such_loation_service.dart';
 import 'package:illegalparking_app/utils/alarm_util.dart';
 import 'package:mask_for_camera_view/mask_for_camera_view_camera_description.dart';
 import 'package:mask_for_camera_view/mask_for_camera_view_inside_line_direction.dart';
@@ -17,7 +18,7 @@ import 'package:mask_for_camera_view/mask_for_camera_view_inside_line.dart';
 import 'package:mask_for_camera_view/crop_image.dart';
 
 CameraController? controller;
-List<CameraDescription>? _cameras = Env.CAMERA_SETTING;
+List<CameraDescription>? _cameras = Env.CAMERA_SETTING; //기기에서 사용가능한 카메라목록 가져옴
 // GlobalKey _stickyKey = GlobalKey();
 double? _screenWidth;
 double? _screenHeight;
@@ -35,7 +36,7 @@ class MaskForCameraCustomView extends StatefulWidget {
       required this.onTake,
       this.cameraDescription = MaskForCameraViewCameraDescription.rear,
       this.borderType = MaskForCameraViewBorderType.solid,
-      this.insideLine,
+      this.insideLine, //자르기 x,y좌표 기준 및 몇개 자를지 정하는 값(비어있으면 기본좌표 + 1개로 처리)
       this.appBarColor = Colors.black,
       this.boxBorderColor = Colors.black,
       this.takeButtonColor = Colors.white,
@@ -71,7 +72,8 @@ class _MaskForCameraCustomViewState extends State<MaskForCameraCustomView> with 
   void initState() {
     try {
       controller = CameraController(
-        widget.cameraDescription == MaskForCameraViewCameraDescription.rear ? _cameras!.first : _cameras!.last,
+        // widget.cameraDescription == MaskForCameraViewCameraDescription.rear ? _cameras!.first : _cameras!.last, //앞면, 뒷면 선택
+        _cameras!.first,
         ResolutionPreset.high,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.yuv420,
@@ -101,7 +103,7 @@ class _MaskForCameraCustomViewState extends State<MaskForCameraCustomView> with 
     if (state == AppLifecycleState.inactive) {
       cameraController.dispose();
     } else if (state == AppLifecycleState.resumed) {
-      onNewCameraSelected(cameraController.description);
+      onNewCameraSelected();
     }
   }
 
@@ -189,23 +191,23 @@ class _MaskForCameraCustomViewState extends State<MaskForCameraCustomView> with 
                         widget.boxBorderRadius,
                       ),
                     ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          top: widget.insideLine != null && widget.insideLine!.direction == null ||
-                                  widget.insideLine != null && widget.insideLine!.direction == MaskForCameraViewInsideLineDirection.horizontal
-                              ? ((widget.boxHeight / 10) * _position(widget.insideLine!.position))
-                              : 0.0,
-                          left: widget.insideLine != null && widget.insideLine!.direction == MaskForCameraViewInsideLineDirection.vertical
-                              ? ((widget.boxWidth / 10) * _position(widget.insideLine!.position))
-                              : 0.0,
-                          child: widget.insideLine != null ? _Line(widget) : Container(),
-                        ),
-                        Positioned(
-                          child: _IsCropping(isRunning: isRunning, widget: widget),
-                        ),
-                      ],
-                    ),
+                    // child: Stack(
+                    //   children: [
+                    //     Positioned(
+                    //       top: widget.insideLine != null && widget.insideLine!.direction == null ||
+                    //               widget.insideLine != null && widget.insideLine!.direction == MaskForCameraViewInsideLineDirection.horizontal
+                    //           ? ((widget.boxHeight / 10) * _position(widget.insideLine!.position))
+                    //           : 0.0,
+                    //       left: widget.insideLine != null && widget.insideLine!.direction == MaskForCameraViewInsideLineDirection.vertical
+                    //           ? ((widget.boxWidth / 10) * _position(widget.insideLine!.position))
+                    //           : 0.0,
+                    //       child: widget.insideLine != null ? _Line(widget) : Container(),
+                    //     ),
+                    //     Positioned(
+                    //       child: _IsCropping(isRunning: isRunning, widget: widget),
+                    //     ),
+                    //   ],
+                    // ),
                   ),
                 ),
               ),
@@ -253,6 +255,7 @@ class _MaskForCameraCustomViewState extends State<MaskForCameraCustomView> with 
                               if (res == null) {
                                 throw "Camera expansion is very small";
                               }
+                              // await getGPS();
                               await saveImageDirectory(res, widget.type).then((value) => widget.onTake(res)); // 저장 type 값에 따라 저장하는 변수가 바뀜
 
                               setState(() {
@@ -292,7 +295,7 @@ class _MaskForCameraCustomViewState extends State<MaskForCameraCustomView> with 
     );
   }
 
-  Future<void> onNewCameraSelected(CameraDescription cameraDescription) async {
+  Future<void> onNewCameraSelected() async {
     final CameraController? oldController = controller;
     if (oldController != null) {
       // `controller` needs to be set to null before getting disposed,
@@ -385,48 +388,48 @@ Future<MaskForCameraViewResult?> _cropPicture(MaskForCameraViewInsideLine? insid
 
 // Line inside box
 
-class _Line extends StatelessWidget {
-  const _Line(this.widget, {Key? key}) : super(key: key);
-  final MaskForCameraCustomView widget;
+// class _Line extends StatelessWidget {
+//   const _Line(this.widget, {Key? key}) : super(key: key);
+//   final MaskForCameraCustomView widget;
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: widget.insideLine!.direction == null || widget.insideLine!.direction == MaskForCameraViewInsideLineDirection.horizontal ? widget.boxWidth : widget.boxBorderWidth,
-      height: widget.insideLine!.direction != null && widget.insideLine!.direction == MaskForCameraViewInsideLineDirection.vertical ? widget.boxHeight : widget.boxBorderWidth,
-      color: widget.boxBorderColor,
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: widget.insideLine!.direction == null || widget.insideLine!.direction == MaskForCameraViewInsideLineDirection.horizontal ? widget.boxWidth : widget.boxBorderWidth,
+//       height: widget.insideLine!.direction != null && widget.insideLine!.direction == MaskForCameraViewInsideLineDirection.vertical ? widget.boxHeight : widget.boxBorderWidth,
+//       color: widget.boxBorderColor,
+//     );
+//   }
+// }
 
 // Progress widget. Used during cropping.
 
-class _IsCropping extends StatelessWidget {
-  const _IsCropping({Key? key, required this.isRunning, required this.widget}) : super(key: key);
-  final bool isRunning;
-  final MaskForCameraCustomView widget;
+// class _IsCropping extends StatelessWidget {
+//   const _IsCropping({Key? key, required this.isRunning, required this.widget}) : super(key: key);
+//   final bool isRunning;
+//   final MaskForCameraCustomView widget;
 
-  @override
-  Widget build(BuildContext context) {
-    return isRunning && widget.boxWidth >= 50.0 && widget.boxHeight >= 50.0
-        ? const Center(
-            child: CupertinoActivityIndicator(
-              radius: 12.8,
-            ),
-          )
-        : Container();
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return isRunning && widget.boxWidth >= 50.0 && widget.boxHeight >= 50.0
+//         ? const Center(
+//             child: CupertinoActivityIndicator(
+//               radius: 12.8,
+//             ),
+//           )
+//         : Container();
+//   }
+// }
 
 // To get position index for crop
 
-int _position(MaskForCameraViewInsideLinePosition? position) {
-  int p = 5;
-  if (position != null) {
-    p = position.index + 1;
-  }
-  return p;
-}
+// int _position(MaskForCameraViewInsideLinePosition? position) {
+//   int p = 5;
+//   if (position != null) {
+//     p = position.index + 1;
+//   }
+//   return p;
+// }
 
 void cameradispose() {
   controller!.dispose();

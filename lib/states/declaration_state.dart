@@ -72,22 +72,22 @@ class _DeclarationState extends State<Declaration> {
         });
     try {
       if (Env.CARNUMBER_CAMERA_RESHOOT_CHECK == false && Env.CAR_CAMERA_RESHOOT_CHECK == false) {
-        await getGPS();
-        await sendFileByAI(Env.SERVER_AI_FILE_UPLOAD_URL, controller.carnumberImage.value).then((carNum) {
-          carNum = carNum.replaceAll('"', '');
+        await setAddress(latitude: controller.imageGPS.value.latitude, longitude: controller.imageGPS.value.longitude);
+        // await sendFileByAI(Env.SERVER_AI_FILE_UPLOAD_URL, controller.carnumberImage.value).then((carNum) {
+        //   carNum = carNum.replaceAll('"', '');
 
-          if (carNum == null || carNum == "") {
-            _numberplateContoroller = TextEditingController(text: "인식실패");
-            controller.carNumberwrite("인식실패");
-          } else {
-            _numberplateContoroller = TextEditingController(text: carNum);
-            controller.carNumberwrite(carNum);
-          }
+        //   if (carNum == null || carNum == "") {
+        //     _numberplateContoroller = TextEditingController(text: "인식실패");
+        //     controller.carNumberwrite("인식실패");
+        //   } else {
+        //     _numberplateContoroller = TextEditingController(text: carNum);
+        //     controller.carNumberwrite(carNum);
+        //   }
 
-          if (carNum.length > 10) {
-            carNum = "";
-          }
-        });
+        //   if (carNum.length > 10) {
+        //     carNum = "";
+        //   }
+        // });
       } else if (Env.CARNUMBER_CAMERA_RESHOOT_CHECK == true && Env.CAR_CAMERA_RESHOOT_CHECK == false) {
         await sendFileByAI(Env.SERVER_AI_FILE_UPLOAD_URL, controller.carnumberImage.value).then((carNum) {
           carNum = carNum.replaceAll('"', '');
@@ -105,7 +105,7 @@ class _DeclarationState extends State<Declaration> {
           }
         });
       } else if (Env.CARNUMBER_CAMERA_RESHOOT_CHECK == false && Env.CAR_CAMERA_RESHOOT_CHECK == true) {
-        await getGPS();
+        await setAddress(latitude: controller.imageGPS.value.latitude, longitude: controller.imageGPS.value.longitude);
       } else {
         showSnackBar(context, "재촬영 체크 에러");
       }
@@ -118,7 +118,6 @@ class _DeclarationState extends State<Declaration> {
       _numberplateContoroller = TextEditingController(text: "인식실패");
       // showSnackBar(context, "서버 에러 or 타임아웃");
     }
-
     // alertDialogByGetxonebutton("GPS", "longitude : ${controller.imageGPS.value.longitude}     latitude: ${controller.imageGPS.value.latitude}");
     setState(() {});
   }

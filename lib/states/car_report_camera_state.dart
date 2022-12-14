@@ -6,6 +6,7 @@ import 'package:illegalparking_app/config/env.dart';
 import 'package:illegalparking_app/config/style.dart';
 import 'package:illegalparking_app/controllers/login_controller.dart';
 import 'package:illegalparking_app/controllers/report_controller.dart';
+import 'package:illegalparking_app/services/such_loation_service.dart';
 import 'package:illegalparking_app/states/home.dart';
 
 import 'package:illegalparking_app/states/widgets/crop.dart';
@@ -86,6 +87,8 @@ class _ReportcameraState extends State<Reportcamera> {
                 btomhighbtn: !c.carnumberImage.value.isNotEmpty ? Env.MEDIA_SIZE_HEIGHT! / 1.45 : Env.MEDIA_SIZE_HEIGHT! / 1.5, // 버튼위치 조정
                 onTake: (MaskForCameraViewResult res) {
                   c.imageTimewrite(getDateToStringForAll(getNow()));
+                  setGPS();
+
                   if (c.carnumberImage.value.isNotEmpty) {
                     if (controller != null) {
                       Get.offAll(() => const Declaration());

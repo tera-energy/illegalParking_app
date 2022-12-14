@@ -25,7 +25,7 @@ class Numbercamera extends StatefulWidget {
 }
 
 class _NumbercameraState extends State<Numbercamera> {
-  final ReportController c = Get.put(ReportController());
+  final reportController = Get.put(ReportController());
   final loginController = Get.put(LoginController());
   @override
   void initState() {
@@ -109,7 +109,7 @@ class _NumbercameraState extends State<Numbercamera> {
               btomhighbtn: Env.MEDIA_SIZE_HEIGHT! / 1.65,
               backColor: Colors.black,
               onTake: (MaskForCameraViewResult res) {
-                c.carNumberwrite("");
+                reportController.carNumberwrite("");
                 Get.offAll(() => const Declaration());
               }),
           CreateContainerByAlignment(-0.70, Platform.isIOS ? -0.9 : -0.925, createContainerByTopWidget(color: AppColors.white, function: backbtn)),
@@ -140,7 +140,7 @@ class _NumbercameraState extends State<Numbercamera> {
   WillPopScope _createWillPopScope(Widget widget) {
     return WillPopScope(
         onWillPop: () {
-          if (c.carnumberImage.value.length > 1) {
+          if (reportController.carnumberImage.value.length > 1) {
             Get.back();
             Env.CARNUMBER_CAMERA_RESHOOT_CHECK = false;
           } else {
@@ -175,7 +175,7 @@ class _NumbercameraState extends State<Numbercamera> {
 
   gotohome() {
     // cameradispose();
-    c.initialize();
+    reportController.initialize();
     Get.offAll(const Home());
     loginController.changePage(1);
   }
@@ -186,12 +186,12 @@ class _NumbercameraState extends State<Numbercamera> {
       resizeDuration: null,
       direction: DismissDirection.endToStart,
       onDismissed: (direction) {
-        if (c.carNumber.isNotEmpty) {
+        if (reportController.carNumber.isNotEmpty) {
           Get.back();
         } else {
           Get.to(const Home());
           loginController.changePage(1);
-          c.initialize();
+          reportController.initialize();
         }
       },
       child: widget,

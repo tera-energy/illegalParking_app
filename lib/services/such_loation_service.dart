@@ -9,9 +9,9 @@ import 'package:illegalparking_app/models/kakao_model.dart';
 import 'package:illegalparking_app/utils/alarm_util.dart';
 import 'package:illegalparking_app/utils/log_util.dart';
 
-final ReportController controller = Get.put(ReportController());
+final ReportController reportcontroller = Get.put(ReportController());
 
-Future<Position> searchAddress() async {
+Future<Position> searchGPS() async {
   return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
 }
 
@@ -19,30 +19,32 @@ Future<double> setBearing(double startLatitude, double startLongitude, double en
   return Geolocator.bearingBetween(startLatitude, startLongitude, endLatitude, endLongitude);
 }
 
-Future<void> getGPS() async {
-  Position position = await searchAddress();
+Future<void> setGPS() async {
+  Position position = await searchGPS();
   double longitude;
   double latitude;
   if (position.longitude > 1 || position.latitude > 1) {
     longitude = position.longitude;
     latitude = position.latitude;
-    // controller.addresswrite(latitude: latitude, longitude: longitude, address: "");
-    await regeocoder(longitude, latitude).then((value) => controller.addresswrite(latitude: latitude, longitude: longitude, address: value));
   } else {
     alertDialogByGetxonebutton("알림", "GPS 위도경도 실패!");
     longitude = 0.0;
     latitude = 0.0;
   }
+  reportcontroller.addresswrite(latitude: latitude, longitude: longitude, address: "");
+}
+
+Future<void> setAddress({required double latitude, required double longitude}) async {
+  await regeocoder(longitude: longitude, latitude: latitude).then((value) => reportcontroller.addresswrite(latitude: latitude, longitude: longitude, address: value));
 }
 
 //카카오 경도 위도로 주소
-Future<String> regeocoder(double longitude, double latitude) async {
+Future<String> regeocoder({required double longitude, required double latitude}) async {
   Kakao map;
   String kakaourl = "https://dapi.kakao.com/v2/local/geo/coord2address.json?x=$longitude&y=$latitude&input_coord=WGS84";
 
   try {
     final responseGps = await http.get(Uri.parse(kakaourl), headers: {"Authorization": "KakaoAK ${Env.KEY_KAAKAO_RESTAPI}"}).timeout(const Duration(seconds: 2));
-
     if (responseGps.statusCode == 200) {
       map = Kakao.fromJson(json.decode(responseGps.body));
       String lnmAddr = map.documents[0]['address']['address_name'];

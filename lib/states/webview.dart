@@ -300,7 +300,7 @@ class _WebviewPageState extends State<WebviewPage> {
   }
 
   void _sendGPS() {
-    searchAddress().then((position) {
+    searchGPS().then((position) {
       Log.debug("currentPosition X : ${position.latitude}\ncurrentPosition Y :${position.longitude}");
       mapController.setLatitude(position.latitude);
       mapController.setLongitude(position.longitude);
