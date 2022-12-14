@@ -40,7 +40,7 @@ class _ConfirmationState extends State<Confirmation> {
       }
       testcount++;
       Log.debug("state {$testcount}");
-      // saveImageGallery();
+      saveImageGallery();
       controller.initialize();
     });
   }
