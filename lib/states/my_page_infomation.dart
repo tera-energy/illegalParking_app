@@ -254,12 +254,13 @@ class _MyPageInfomationState extends State<MyPageInfomation> {
                                           }),
                                     if (oldPasswordValidation)
                                       createTextFormField(
-                                          obscureText: true,
+                                          obscureText: settingController.hidepasswordMypage3.value,
                                           fillColor: AppColors.textField,
                                           hintText: "비밀번호 확인해주세요.",
                                           helperText: "보안이 안전된 암호입니다.",
                                           controller: _newPasswordValidationController,
                                           validation: passwordConfirmValidator,
+                                          passwordswich: true,
                                           function: () {
                                             settingController.hidepasswordMypage3write(!settingController.hidepasswordMypage3.value);
                                             setState(
